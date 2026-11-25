@@ -1,0 +1,642 @@
+/* All styling for the Animator app. Its code only attaches class names. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+/* Palette: #1E5441, #1E4C54, #1E3154 */
+
+/* ── Layout: two columns ─────────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #1E3154;
+  color: #E4EEE9;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* Left column: the code editor. */
+.code-col {
+  width: 42%;
+  min-width: 320px;
+  max-width: 720px;
+  flex-shrink: 0;
+  display: flex;
+  border-right: 1px solid #E4EEE9;
+  background: #1E5441;
+}
+
+/* The code column stays in the DOM when collapsed, so CodeMirror keeps its
+   state; hiding it gives the right column the full width. */
+.app.code-hidden .code-col { display: none; }
+
+/* A small emoji button (the code pane's collapse toggle, and the playback
+   controls once they exist). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1E3154;
+  color: #E4EEE9;
+  border: 1px solid #E4EEE9;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 5px 8px;
+}
+.icon-btn:hover { background: #1E4C54; }
+
+/* ── Code panel (left column) ───────────────────────────────────────────── */
+
+.code-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1E4C54;
+  border-bottom: 1px solid #E4EEE9;
+}
+.code-title {
+  color: #E4EEE9;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+/* Wrapper holding the editor. */
+.code-editor-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+/* CodeMirror mount node: grows to fill the panel. */
+.code-editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  background: #1E5441;
+}
+.code-editor .cm-editor { width: 100%; height: 100%; }
+
+/* Collapsible reference of the built-ins available to draw functions. */
+.reference {
+  margin: 8px 14px 0;
+  border: 1px solid #E4EEE9;
+  border-radius: 4px;
+  background: #1E3154;
+  overflow: hidden;
+}
+.reference-summary {
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #E4EEE9;
+  font-family: monospace;
+  font-size: 12px;
+  user-select: none;
+}
+.reference-summary:hover { color: #B8D0C8; }
+.reference-body {
+  padding: 4px 12px 10px;
+  border-top: 1px solid #E4EEE9;
+}
+.reference-group { margin-top: 8px; }
+.reference-group-title {
+  color: #B8D0C8;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.reference-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 1px 0;
+}
+.reference-sig {
+  color: #E4EEE9;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre;
+}
+.reference-desc { color: #B8D0C8; font-size: 11px; }
+
+/* ── Animation area (right column) ──────────────────────────────────────── */
+
+.canvas-area {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1E3154;
+  container-type: size;
+}
+
+/* Parse/eval error — compact, bottom-left; keeps clear of the paint control. */
+.error-banner {
+  position: absolute;
+  left: 16px;
+  right: auto;
+  bottom: 16px;
+  z-index: 20;
+  width: min(280px, calc(100% - 120px));
+  margin: 0;
+  padding: 10px 14px 12px;
+  overflow: auto;
+  max-height: min(36%, 200px);
+  color: #3b0a1a;
+  background: #ffd6df;
+  border: 2px solid #c6284a;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.error-banner-label {
+  margin-bottom: 6px;
+  font-family: 'Georgia', serif;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9b1c3a;
+}
+.error-banner-msg {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 1.5;
+  color: #3b0a1a;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Button that reveals the code column again when it is hidden. */
+.reveal-code {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+/* Shape/speed sliders and play/pause/reset over the animation pane. */
+.controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #1E4C54;
+  border: 1px solid #E4EEE9;
+  border-radius: 6px;
+  color: #E4EEE9;
+  font-size: 13px;
+}
+.app.code-hidden .controls {
+  left: 52px;
+}
+.drawing-select-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.drawing-select-row span {
+  min-width: 44px;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.04em;
+}
+.drawing-select-row select {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  background: #1E3154;
+  color: #E4EEE9;
+  border: 1px solid #E4EEE9;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.controls-sliders {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+.controls-buttons {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 160px;
+  flex: 1;
+}
+.slider-row label {
+  min-width: 44px;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.04em;
+}
+.slider-row input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: #E4EEE9;
+  cursor: pointer;
+}
+.slider-row input[type="range"] + .slider-value {
+  margin-left: -2px;
+}
+.slider-value {
+  min-width: 2em;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.playback-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.controls-reset {
+  margin-left: 10px;
+}
+.controls-trailing {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+/* Styled new-drawing name dialog (replaces unstyleable window.prompt). */
+.name-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 49, 84, 0.72);
+}
+.name-dialog {
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  background: #1E4C54;
+  color: #E4EEE9;
+  border: 1px solid #E4EEE9;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.name-dialog-title {
+  margin: 0 0 12px;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+}
+.name-dialog-input {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: #1E3154;
+  color: #E4EEE9;
+  border: 1px solid #E4EEE9;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.name-dialog-input::placeholder {
+  color: #B8D0C8;
+}
+.name-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.name-dialog-create {
+  background: #1E5441;
+}
+
+/* Ink / paintbrush control inside the main controls box. */
+.paint-anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.paint-can {
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border-radius: 50%;
+  background: #1E3154;
+  border: 1px solid #E4EEE9;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.paint-can:hover,
+.paint-can-open {
+  background: #1E5441;
+}
+.paint-can-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+/* Overlay so opening ink colors does not stretch the controls box over the canvas. */
+.paint-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  z-index: 30;
+  width: 200px;
+  padding: 10px;
+  background: #1E3154;
+  color: #E4EEE9;
+  border: 1px solid #E4EEE9;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.paint-dropdown-label {
+  margin: 0;
+  font-family: 'Georgia', serif;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.paint-swatches {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.paint-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #E4EEE9;
+  cursor: pointer;
+  padding: 0;
+}
+.paint-swatch-selected {
+  outline: 2px solid #7FDBDA;
+  outline-offset: 2px;
+}
+.paint-wheel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.paint-wheel {
+  width: 42px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #E4EEE9;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Color Match / Play Game */
+.play-game-btn {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 16;
+  padding: 10px 18px;
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: #E4EEE9;
+  background: #1E5441;
+  border: 2px solid #E4EEE9;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.play-game-btn:hover {
+  background: #1E4C54;
+}
+.play-game-btn-quit {
+  background: #1E3154;
+  border-color: #F0A0A8;
+  color: #F0A0A8;
+}
+.match-hud {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #1E4C54;
+  border: 1px solid #E4EEE9;
+  border-radius: 6px;
+  color: #E4EEE9;
+  font-size: 13px;
+}
+.match-hud-playing {
+  border-color: #E8C84A;
+}
+.match-hud-lost {
+  border-color: #F0A0A8;
+}
+.match-hud-label {
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.04em;
+}
+.match-preview-wrap {
+  width: 88px;
+  height: 88px;
+  border-radius: 8px;
+  border: 1px solid #E8C84A;
+  background: #1E3154;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.match-preview-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.match-hud-swatch {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #E4EEE9;
+  flex-shrink: 0;
+}
+.match-hud-swatch-pulse {
+  animation: match-pulse 0.7s ease-in-out infinite;
+}
+@keyframes match-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 200, 74, 0.5); }
+  50% { transform: scale(1.12); box-shadow: 0 0 0 6px rgba(232, 200, 74, 0); }
+}
+.match-hud-timer {
+  font-variant-numeric: tabular-nums;
+  min-width: 2em;
+  font-weight: 600;
+}
+.match-hud-streak {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
+}
+.match-hud-lives {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  color: #E8C84A;
+}
+.match-setup {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  width: min(420px, calc(100% - 32px));
+  padding: 18px 20px;
+  background: #1E4C54;
+  border: 2px solid #E8C84A;
+  border-radius: 10px;
+  color: #E4EEE9;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.match-setup-title {
+  margin: 0 0 6px;
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+}
+.match-setup-sub {
+  margin: 0 0 14px;
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.35;
+}
+.match-setup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.match-setup-chip {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #E4EEE9;
+  background: #1E3154;
+  color: #E4EEE9;
+  cursor: pointer;
+  font-size: 13px;
+}
+.match-setup-chip-on {
+  background: #1E5441;
+  border-color: #E8C84A;
+  color: #E8C84A;
+}
+.match-setup-stats {
+  margin: 8px 0 14px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+.match-setup-start {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 2px solid #E4EEE9;
+  background: #1E5441;
+  color: #E4EEE9;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  cursor: pointer;
+}
+.match-setup-start:hover {
+  background: #1E3154;
+}
+.match-toast {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 22;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  animation: match-toast-in 0.2s ease-out;
+}
+.match-toast-wrong {
+  background: #5a1e2a;
+  border: 1px solid #F0A0A8;
+  color: #F0A0A8;
+}
+.match-toast-near {
+  background: #5a4a1e;
+  border: 1px solid #E8C84A;
+  color: #E8C84A;
+}
+.match-toast-unlock {
+  background: #1E5441;
+  border: 1px solid #7FDBDA;
+  color: #7FDBDA;
+}
+@keyframes match-toast-in {
+  from { opacity: 0; transform: translate(-50%, -8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.canvas-area.match-flash-wrong {
+  animation: match-area-wrong 0.45s ease-out;
+}
+.canvas-area.match-flash-near {
+  animation: match-area-near 0.45s ease-out;
+}
+.canvas-area.match-flash-unlock {
+  animation: match-area-unlock 0.6s ease-out;
+}
+@keyframes match-area-wrong {
+  0%, 100% { box-shadow: inset 0 0 0 0 rgba(240, 160, 168, 0); }
+  40% { box-shadow: inset 0 0 0 4px rgba(240, 160, 168, 0.85); }
+}
+@keyframes match-area-near {
+  0%, 100% { box-shadow: inset 0 0 0 0 rgba(232, 200, 74, 0); }
+  40% { box-shadow: inset 0 0 0 4px rgba(232, 200, 74, 0.85); }
+}
+@keyframes match-area-unlock {
+  0%, 100% { box-shadow: inset 0 0 0 0 rgba(127, 219, 218, 0); }
+  40% { box-shadow: inset 0 0 0 4px rgba(127, 219, 218, 0.85); }
+}
+
+/* A centred square that fits the (possibly non-square) animation area. Give your
+   <canvas> this class, so that drawings aren't stretched. */
+.canvas {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+}
